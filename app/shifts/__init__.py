@@ -1,0 +1,1 @@
+from app.shifts.views import shifts # noqa

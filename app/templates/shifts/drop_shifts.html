@@ -1,0 +1,8 @@
+{% extends 'layouts/base.html' %}
+{% import 'macros/form_macros.html' as f %}
+{% block content %}
+{% for pair in store %}
+
+<h1> {{pair[0]}} - {{pair[1]}} </h1>
+{% endfor %}
+{% endblock %}

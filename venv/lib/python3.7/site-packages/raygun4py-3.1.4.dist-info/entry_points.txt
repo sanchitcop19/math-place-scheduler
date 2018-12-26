@@ -1,0 +1,3 @@
+[console_scripts]
+raygun4py = raygun4py.cli:main
+
