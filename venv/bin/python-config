@@ -1,4 +1,4 @@
-#!/Users/SanchitBatra/Desktop/Projects/flask-base/venv/bin/python
+#!/Users/SanchitBatra/Desktop/Projects/mathplace/venv/bin/python
 
 import sys
 import getopt

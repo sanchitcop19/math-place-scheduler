@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask_login import current_user, login_required
 from app.models import Shift, ShiftDetails, User
+from app.shifts.forms import SimpleForm
 import sys
 from math import floor
 
@@ -11,14 +12,15 @@ shifts = Blueprint('shifts', __name__)
 def add_shifts():
     print(current_user.email == "")
 
-    
-
 @shifts.route('/drop_shifts')
 def drop_shifts():
+
     shift_details = ShiftDetails.query.filter_by(tutor_id = current_user.id).all()
     user = current_user
     shifts_s = []
     shifts_f = []
+    form = DropForm()
+
     for detail in shift_details:
         print(detail.id)
         shift = Shift.query.filter_by(id = detail.shift_id).first()
