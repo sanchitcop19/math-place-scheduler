@@ -1,1 +1,1 @@
-/Users/SanchitBatra/miniconda3
+/Users/SanchitBatra/anaconda3

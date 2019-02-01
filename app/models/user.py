@@ -19,6 +19,7 @@ class ShiftDetails(db.Model):
     tutor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     shift_id = db.Column(db.Integer, db.ForeignKey('shifts.id'))
     status = db.Column(db.Integer, nullable = False, default = 0)
+    day = db.Column(db.Integer)
     shift = db.relationship(Shift)
 
 class Permission:
