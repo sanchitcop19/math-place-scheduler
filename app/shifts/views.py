@@ -75,6 +75,7 @@ def drop_shifts():
 
     for i, day in enumerate(days, start = 1):
         shift_details = ShiftDetails.query.filter_by(tutor_id = current_user.id, day = i).all()
+        
         shifts_s = []
         shifts_f = []
         for detail in shift_details:
@@ -121,7 +122,8 @@ def pickup_shifts():
 
     user = current_user
     store = [None]*4
-    tutors = [i for i in range(num_tutors)]
+    tutor_ids = [i for i in range(2, num_tutors + 2)]
+    tutors = ["Sanchit", "Jane", "Emily", "Cece", "Michael", "Jake", "Matthew", "Milos", "Mitchell", "Nicholas", "Quan", "Razul", "Shoujing", "Hannah"]
     days = ["Monday", "Tuesday", "Wednesday", "Thursday"]
     form = PickupForm()
 
@@ -162,17 +164,20 @@ def pickup_shifts():
         if user is not None:
             for i, day in enumerate(days, start = 1):
                 if store[i-1]:
-                    for item in store[i-1][0]:
-                        if request.form.get(''.join(("slot_", str(item[0])))):
-                            shift = Shift.query.filter_by(start = item[0]).first().id
-                            save = ShiftDetails.query.filter_by(tutor_id = user.id, shift_id = shift, day = i).first()
+                    for item in store[i-1]:
+                        start = item[0][0][0]
+                        tut_id = item[1]
+
+                        if request.form.get(''.join(("slot_", str(start), "_", str(tut_id)))):
+                            shift = Shift.query.filter_by(start = start).first().id
+                            save = ShiftDetails.query.filter_by(tutor_id = tut_id, shift_id = shift, day = i).first()
                             save.status = 2
+                            save.coverer = user.id
                             db.session.commit()
                     #TODO: add validation for legal shift
         return redirect(url_for('shifts.pickup_shifts'))
 
-
-    return render_template('shifts/pickup_shifts.html', **locals())    
+    return render_template('shifts/pickup_shifts.html', **locals())
  
 #-------------------------------------------------------------------------
 """

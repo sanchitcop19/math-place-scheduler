@@ -5,12 +5,12 @@
 <div class="row">
     {% for item in store %}
     <div class="col-sm-3">
-        <h3>{{days[loop.index-1]}}</h3>
+        <h3>{{days[loop.index-1]}}</h3><br>
     {% if item %}
     {% for pair in item %}
-
-<input style = "display: inline; transform: scale(1.3);margin-left:0.5em; outline: 1px solid #000000" type="checkbox" id="slot_{{loop.index|string}}" name="slot_{{pair[0]}}">  
-<h4 style="margin-left: 1em;display: inline"> {{pair[0][0][0]}}-{{pair[0][0][1]}} </h4><h4 style="margin-left: 1em;display: inline">{{pair[1]}}</h4><br><br>
+<input style = "display: inline; transform: scale(1.3);margin-left:0.5em; outline: 1px solid #000000" type="checkbox" id="slot_{{loop.index|string}}" name="slot_{{pair[0][0][0]}}_{{pair[1]}}">
+<h4 style="margin-left: 1em;display: inline"> {{pair[0][0][0]}}-{{pair[0][0][1]}} </h4>
+        <h4 style="margin-left: 1em;display: inline">{{tutors[pair[1]-2]}}</h4><br><br>
 {% endfor %}
 {% endif %}
 </div>
