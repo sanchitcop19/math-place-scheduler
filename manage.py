@@ -36,7 +36,7 @@ def test():
 @manager.command
 def recreate_db():
     """
-    Recreates a local database. You probably should not use this on
+    Recreates a local database. You pfrobably should not use this on
     production.
     """
     db.drop_all()

@@ -118,14 +118,6 @@ def drop_shifts():
 @login_required
 @shifts.route('/pickup_shifts', methods = ['GET', 'POST'])
 def pickup_shifts():
-    def translate_time(shift):
-        if not shift:
-            return None
-        shift_start = shift[0]
-        shift_start = time.strptime(shift_start, "%H:%M")
-        shift_end = shift[1]
-        shift_end = time.strptime(shift_end, "%H:%M")
-        return (shift_start.tm_hour + (0.5 if shift_start.tm_min == 30 else 0.0), shift_end.tm_hour + (0.5 if shift_end.tm_min == 30 else 0.0))
 
     user = current_user
     store = [None]*4
@@ -135,10 +127,10 @@ def pickup_shifts():
 
     for i, day in enumerate(days, start = 1):
         shift_details = ShiftDetails.query.filter_by(status = 1, day = i).all()
-        shifts_s = []
-        shifts_f = []
+
         for detail in shift_details:
-            
+            shifts_s = []
+            shifts_f = []
             shift = Shift.query.filter_by(id = detail.shift_id).first()
 
             if not isclose(floor(shift.start),shift.start, abs_tol=0.00001):
@@ -151,17 +143,26 @@ def pickup_shifts():
 
             shifts_s.append(shift)
             shifts_f.append(shift_f)
-            store[i-1] = zip(shifts_s, shifts_f)
+
+ 
             if not store[i-1]:
-                continue
-            store[i-1] = list(map(translate_time, store[i-1]), detail.tutor_id)
-        print(store)
+                store[i-1] = [(tuple(zip(shifts_s, shifts_f)), detail.tutor_id)]
+            else:
+                store[i-1].append((tuple(zip(shifts_s, shifts_f)), detail.tutor_id))
+
+    for i, day in enumerate(days, start = 1):
+        if not store[i - 1]:
+            continue
+        for j, shift in enumerate(store[i-1]):
+            store[i-1][j] = (list(map(translate_time, store[i-1][j][0])), store[i-1][j][1])
+    for item in store:
+        print(item, "\n")
     if form.validate_on_submit():
         user = current_user
         if user is not None:
             for i, day in enumerate(days, start = 1):
                 if store[i-1]:
-                    for item in store[i-1]:
+                    for item in store[i-1][0]:
                         if request.form.get(''.join(("slot_", str(item[0])))):
                             shift = Shift.query.filter_by(start = item[0]).first().id
                             save = ShiftDetails.query.filter_by(tutor_id = user.id, shift_id = shift, day = i).first()
