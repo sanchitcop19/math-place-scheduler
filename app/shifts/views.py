@@ -75,11 +75,10 @@ def drop_shifts():
 
     for i, day in enumerate(days, start = 1):
         shift_details = ShiftDetails.query.filter_by(tutor_id = current_user.id, day = i).all()
-        
-        shifts_s = []
-        shifts_f = []
         for detail in shift_details:
-            if detail and detail.status != Shift_Enum.DROPPED.value:
+            shifts_s = []
+            shifts_f = []
+            if detail and detail.status == Shift_Enum.ASSIGNED.value:
                 shift = Shift.query.filter_by(id = detail.shift_id).first()
                 if not isclose(floor(shift.start),shift.start, abs_tol=0.00001):
                     shift_f = str(shift.end) + ":00"
@@ -93,6 +92,28 @@ def drop_shifts():
                 shifts_f.append(shift_f)
 
                 store[i-1] = zip(shifts_s, shifts_f)
+        shift_details = ShiftDetails.query.filter_by(coverer=current_user.id, day=i).all()
+        print(shift_details)
+        for detail in shift_details:
+
+            shifts_s = []
+            shifts_f = []
+            if detail and detail.status == Shift_Enum.PICKED_UP.value:
+                shift = Shift.query.filter_by(id = detail.shift_id).first()
+
+                if not isclose(floor(shift.start),shift.start, abs_tol=0.00001):
+                    shift_f = str(shift.end) + ":00"
+                    shift = (str(floor(shift.start))+ ":30")
+
+                else:
+                    shift_f = str(floor(shift.end)) + ":30"
+                    shift = str(shift.start) + ":00"
+
+                shifts_s.append(shift)
+                shifts_f.append(shift_f)
+
+                store[i-1] = zip(shifts_s, shifts_f)
+
     #print([translate_time(item) for item in store])
     for i, item in enumerate(store):
         if not item:
