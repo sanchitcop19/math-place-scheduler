@@ -93,7 +93,7 @@ def drop_shifts():
                 if not store[i-1]:
                     store[i-1] = [(zip(shifts_s, shifts_f))]
                 else:
-                    store[i-1].append((zip(shifts_s, shifts_f)))
+                    store[i-1].append(zip(shifts_s, shifts_f))
 
         shift_details = ShiftDetails.query.filter_by(coverer=current_user.id, day=i).all()
         print(shift_details)
@@ -114,9 +114,11 @@ def drop_shifts():
 
                 shifts_s.append(shift)
                 shifts_f.append(shift_f)
-
-                store[i-1].append(zip(shifts_s, shifts_f))
-
+                if not store[i-1]:
+                    store[i-1] = [(zip(shifts_s, shifts_f))]
+                else:
+                    store[i-1].append(zip(shifts_s, shifts_f))
+                    
     #print([translate_time(item) for item in store])
     for i, day in enumerate(store):
         if not day:
@@ -185,8 +187,7 @@ def pickup_shifts():
             continue
         for j, shift in enumerate(store[i-1]):
             store[i-1][j] = (list(map(translate_time, store[i-1][j][0])), store[i-1][j][1])
-    for item in store:
-        print(item, "\n")
+
     if form.validate_on_submit():
         user = current_user
         if user is not None:
