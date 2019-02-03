@@ -7,10 +7,12 @@
 {% for item in store %}
 <div class="col-sm-3">
     <h3>{{days[loop.index-1]}}</h3>
+    {% set dayloop = loop %}
 {% if item %}
 {% for pair in item %}
     {% for time in pair %}
-<input style = "display: inline; transform: scale(1.3);margin-left:0.5em; outline: 1px solid #000000" type="checkbox" id="slot_{{loop.index|string}}" name="slot_{{time[0]}}">
+<input style = "display: inline; transform: scale(1.3);margin-left:0.5em; outline: 1px solid #000000" type="checkbox" id="slot_{{loop.index|string}}" name="slot_{{time[0]}}_{{days[dayloop.index-1]}}">
+
 <h4 style="margin-left: 1em;display: inline"> {{time[0]}}-{{time[1]}} </h4><br><br>
     {% endfor %}
     {% endfor %}

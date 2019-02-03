@@ -118,7 +118,7 @@ def drop_shifts():
                     store[i-1] = [(zip(shifts_s, shifts_f))]
                 else:
                     store[i-1].append(zip(shifts_s, shifts_f))
-                    
+
     #print([translate_time(item) for item in store])
     for i, day in enumerate(store):
         if not day:
@@ -134,7 +134,8 @@ def drop_shifts():
                 if store[i-1]:
                     for item in store[i-1]:
                         for time in item:
-                            if request.form.get(''.join(("slot_", str(time[0])))):
+                            save = days[i-1]
+                            if request.form.get(''.join(("slot_", str(time[0]), "_", str(days[i-1])))):
                                 shift = Shift.query.filter_by(start = time[0]).first().id
                                 save = ShiftDetails.query.filter_by(tutor_id = user.id, shift_id = shift, day = i).first()
                                 if not save:
