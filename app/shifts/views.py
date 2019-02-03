@@ -69,7 +69,7 @@ def add_shifts():
 def drop_shifts():
 
     user = current_user
-    store = [None]*4
+    store = [[]]*4
     days = ["Monday", "Tuesday", "Wednesday", "Thursday"]
     form = DropForm()
 
@@ -78,7 +78,7 @@ def drop_shifts():
         for detail in shift_details:
             shifts_s = []
             shifts_f = []
-            if detail and detail.status == Shift_Enum.ASSIGNED.value:
+            if detail and detail.status == Shift_Enum.ASSIGNED.value or (detail.status == Shift_Enum.PICKED_UP.value and detail.coverer == user.id):
                 shift = Shift.query.filter_by(id = detail.shift_id).first()
                 if not isclose(floor(shift.start),shift.start, abs_tol=0.00001):
                     shift_f = str(shift.end) + ":00"
@@ -90,15 +90,18 @@ def drop_shifts():
 
                 shifts_s.append(shift)
                 shifts_f.append(shift_f)
+                if not store[i-1]:
+                    store[i-1] = [(zip(shifts_s, shifts_f))]
+                else:
+                    store[i-1].append((zip(shifts_s, shifts_f)))
 
-                store[i-1] = zip(shifts_s, shifts_f)
         shift_details = ShiftDetails.query.filter_by(coverer=current_user.id, day=i).all()
         print(shift_details)
         for detail in shift_details:
 
             shifts_s = []
             shifts_f = []
-            if detail and detail.status == Shift_Enum.PICKED_UP.value:
+            if detail and detail.status == Shift_Enum.PICKED_UP.value and detail.tutor_id != user.id:
                 shift = Shift.query.filter_by(id = detail.shift_id).first()
 
                 if not isclose(floor(shift.start),shift.start, abs_tol=0.00001):
@@ -112,13 +115,14 @@ def drop_shifts():
                 shifts_s.append(shift)
                 shifts_f.append(shift_f)
 
-                store[i-1] = zip(shifts_s, shifts_f)
+                store[i-1].append(zip(shifts_s, shifts_f))
 
     #print([translate_time(item) for item in store])
-    for i, item in enumerate(store):
-        if not item:
+    for i, day in enumerate(store):
+        if not day:
             continue
-        store[i] = list(map(translate_time, item))
+        for j, item in enumerate(day):
+            store[i][j] = list(map(translate_time, item))
 
     if form.validate_on_submit():
         user = current_user
@@ -127,12 +131,15 @@ def drop_shifts():
             for i, day in enumerate(days, start = 1):
                 if store[i-1]:
                     for item in store[i-1]:
-                        if request.form.get(''.join(("slot_", str(item[0])))):
-                            shift = Shift.query.filter_by(start = item[0]).first().id
-                            save = ShiftDetails.query.filter_by(tutor_id = user.id, shift_id = shift, day = i).first()
-                            save.status = 1
-                            db.session.commit()
-                    #TODO: add validation for legal shift
+                        for time in item:
+                            if request.form.get(''.join(("slot_", str(time[0])))):
+                                shift = Shift.query.filter_by(start = time[0]).first().id
+                                save = ShiftDetails.query.filter_by(tutor_id = user.id, shift_id = shift, day = i).first()
+                                if not save:
+                                    save = ShiftDetails.query.filter_by(coverer = user.id, shift_id = shift, day = i).first()
+                                save.status = 1
+                                db.session.commit()
+                        #TODO: add validation for legal shift
         return redirect(url_for('shifts.drop_shifts'))
 
     return render_template('shifts/drop_shifts.html', **locals())
@@ -174,7 +181,7 @@ def pickup_shifts():
                 store[i-1].append((tuple(zip(shifts_s, shifts_f)), detail.tutor_id))
 
     for i, day in enumerate(days, start = 1):
-        if not store[i - 1]:
+        if not store[i-1]:
             continue
         for j, shift in enumerate(store[i-1]):
             store[i-1][j] = (list(map(translate_time, store[i-1][j][0])), store[i-1][j][1])
