@@ -14,3 +14,5 @@ class Day(Enum):
     Thursday = 4
 
 num_tutors = 14
+
+num_weeks_displayed = 4

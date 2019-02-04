@@ -5,7 +5,8 @@ from app.models import Shift, ShiftDetails, User
 from app.shifts.forms import DropForm, PickupForm, AddForm
 import sys, time
 from math import floor, isclose
-from app.shifts.store import Shift_Enum, num_tutors
+from app.shifts.store import Shift_Enum, num_tutors, num_weeks_displayed
+from datetime import date, timedelta
 
 shifts = Blueprint('shifts', __name__)
 
@@ -19,6 +20,20 @@ def translate_time(shift):
     shift_end = time.strptime(shift_end, "%H:%M")
     return (shift_start.tm_hour + (0.5 if shift_start.tm_min == 30 else 0.0), shift_end.tm_hour + (0.5 if shift_end.tm_min == 30 else 0.0))
 
+def compute_display_week(day):
+    today = date.today().weekday()
+
+    return (day - today) % 7
+
+def compute_dates():
+
+    store = []
+
+    for i in range(num_weeks_displayed):
+        store.append([])
+        for j in range(4):
+            store[i].append((date.today() + timedelta(7*i + compute_display_week(j))).strftime("%m/%d"))
+    return store
 
 @shifts.route('/add_shifts')
 @login_required
@@ -68,6 +83,9 @@ def add_shifts():
 @shifts.route('/drop_shifts', methods = ['GET', 'POST'])
 def drop_shifts():
 
+
+
+    dates = compute_dates()
     user = current_user
     store = [[]]*4
     days = ["Monday", "Tuesday", "Wednesday", "Thursday"]
